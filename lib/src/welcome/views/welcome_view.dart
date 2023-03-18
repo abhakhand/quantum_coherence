@@ -5,6 +5,13 @@ class WelcomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Material(
+      child: Column(
+        children: [
+          const Expanded(child: Text('')),
+          Expanded(child: Row()),
+        ],
+      ),
+    );
   }
 }

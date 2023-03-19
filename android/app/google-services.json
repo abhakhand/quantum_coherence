@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "166383703771",
+    "project_id": "quantum-coherence-1c043",
+    "storage_bucket": "quantum-coherence-1c043.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:166383703771:android:741fb6aa81f3948905defe",
+        "android_client_info": {
+          "package_name": "com.example.quantum_coherence"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "166383703771-jo9hs2sgfaenjfhuht38h9e7pca7vh0j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.quantum_coherence",
+            "certificate_hash": "90c84bda35bac626cfce9bd0a05c1aa7c3c4eefe"
+          }
+        },
+        {
+          "client_id": "166383703771-devsej7hfv6ife92kr5tsvdept46p0r4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbRTqoid3OM_MoGxTdOrCMsy7JZSELYQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "166383703771-devsej7hfv6ife92kr5tsvdept46p0r4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

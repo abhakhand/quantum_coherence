@@ -16,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthStatusChecked>(_onAuthStatusChecked);
     on<LoggedInWithGoogle>(_onLoggedInWithGoogle);
     on<UserRequested>(_onUserRequested);
+    on<LogoutRequested>(_onLogoutRequested);
   }
 
   final IAuthRepository _authRepository;
@@ -67,5 +68,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) {
     final user = _authRepository.getCurrentUser();
     emit(state.copyWith(user: user));
+  }
+
+  Future<void> _onLogoutRequested(
+    LogoutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(logoutStatus: const Status.loading()));
+
+    final failureOrUnit = await _authRepository.logout();
+
+    emit(
+      failureOrUnit.fold(
+        (f) => state.copyWith(
+          logoutStatus: Status.failure(f),
+          authStatus: AuthStatus.authenticated,
+        ),
+        (f) => state.copyWith(
+          logoutStatus: const Status.success(),
+          authStatus: AuthStatus.unauthenticated,
+        ),
+      ),
+    );
   }
 }

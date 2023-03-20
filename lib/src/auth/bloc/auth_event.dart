@@ -12,3 +12,5 @@ class AuthStatusChecked extends AuthEvent {}
 class LoggedInWithGoogle extends AuthEvent {}
 
 class UserRequested extends AuthEvent {}
+
+class LogoutRequested extends AuthEvent {}

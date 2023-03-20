@@ -9,6 +9,7 @@ abstract class IAuthRepository {
   bool isAuthenticated();
   Future<Either<Failure, Unit>> signInWithGoogle();
   User getCurrentUser();
+  Future<Either<Failure, Unit>> logout();
 }
 
 @LazySingleton(as: IAuthRepository)
@@ -55,7 +56,20 @@ class AuthRepository implements IAuthRepository {
       token: firebaseUser.refreshToken!,
       name: firebaseUser.displayName ?? '',
       email: firebaseUser.email ?? '',
+      imageUrl: firebaseUser.photoURL ?? '',
     );
     return user;
+  }
+
+  @override
+  Future<Either<Failure, Unit>> logout() async {
+    try {
+      await _googleSignIn.disconnect();
+      await _googleSignIn.signOut();
+      await _firebaseAuth.signOut();
+      return right(unit);
+    } catch (e) {
+      return left(Failure.common(e.toString()));
+    }
   }
 }

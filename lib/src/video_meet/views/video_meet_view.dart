@@ -4,9 +4,11 @@ import 'dart:math' hide log;
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:quantum_coherence/src/auth/bloc/auth_bloc.dart';
-import 'package:quantum_coherence/src/welcome/models/session.dart';
+import 'package:quantum_coherence/src/home/models/session.dart';
 
 class VideoMeetView extends StatefulWidget {
   const VideoMeetView({required this.session, super.key});
@@ -29,11 +31,11 @@ class _State extends State<VideoMeetView> {
   Set<int> remoteUid = {};
   final bool _isUseFlutterTexture = false;
   final bool _isUseAndroidSurfaceView = false;
-  final ChannelProfileType _channelProfileType =
-      ChannelProfileType.channelProfileLiveBroadcasting;
+  final _channelProfileType = ChannelProfileType.channelProfileLiveBroadcasting;
 
   bool videoOff = false;
   bool micOff = false;
+  bool remoteVideoOff = false;
 
   @override
   void initState() {
@@ -65,29 +67,46 @@ class _State extends State<VideoMeetView> {
           log('[onError] err: $err, msg: $msg');
         },
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-          log('[onJoinChannelSuccess] connection: ${connection.toJson()} elapsed: $elapsed');
+          log(
+            '[onJoinChannelSuccess] connection: ${connection.toJson()}'
+            ' elapsed: $elapsed',
+          );
           setState(() {
             isJoined = true;
           });
         },
         onUserJoined: (RtcConnection connection, int rUid, int elapsed) {
-          log('[onUserJoined] connection: ${connection.toJson()} remoteUid: $rUid elapsed: $elapsed');
+          log(
+            '[onUserJoined] connection: ${connection.toJson()}'
+            ' remoteUid: $rUid elapsed: $elapsed',
+          );
           setState(() {
             remoteUid.add(rUid);
           });
         },
         onUserOffline:
             (RtcConnection connection, int rUid, UserOfflineReasonType reason) {
-          log('[onUserOffline] connection: ${connection.toJson()}  rUid: $rUid reason: $reason');
+          log(
+            '[onUserOffline] connection: ${connection.toJson()}'
+            '  rUid: $rUid reason: $reason',
+          );
           setState(() {
             remoteUid.removeWhere((element) => element == rUid);
           });
         },
         onLeaveChannel: (RtcConnection connection, RtcStats stats) {
-          log('[onLeaveChannel] connection: ${connection.toJson()} stats: ${stats.toJson()}');
+          log(
+            '[onLeaveChannel] connection: ${connection.toJson()}'
+            ' stats: ${stats.toJson()}',
+          );
           setState(() {
             isJoined = false;
             remoteUid.clear();
+          });
+        },
+        onUserMuteVideo: (connection, remoteUid, muted) {
+          setState(() {
+            remoteVideoOff = muted;
           });
         },
       ),
@@ -122,10 +141,6 @@ class _State extends State<VideoMeetView> {
         clientRoleType: ClientRoleType.clientRoleBroadcaster,
       ),
     );
-  }
-
-  Future<void> _leaveChannel() async {
-    await _engine.leaveChannel();
   }
 
   Future<void> _switchCamera() async {
@@ -186,17 +201,41 @@ class _State extends State<VideoMeetView> {
                 ),
                 child: remoteUid.isEmpty
                     ? const SizedBox.shrink()
-                    : AgoraVideoView(
-                        controller: VideoViewController.remote(
-                          rtcEngine: _engine,
-                          canvas: VideoCanvas(uid: remoteUid.first),
-                          connection: RtcConnection(
-                            channelId: widget.session.id,
+                    : remoteVideoOff
+                        ? ColoredBox(
+                            color: Colors.grey.shade800,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.videocam_off_outlined,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                  if (remoteUid.isEmpty)
+                                    const Text(
+                                      'Your video is turned off!',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : AgoraVideoView(
+                            controller: VideoViewController.remote(
+                              rtcEngine: _engine,
+                              canvas: VideoCanvas(uid: remoteUid.first),
+                              connection: RtcConnection(
+                                channelId: widget.session.id,
+                              ),
+                              useFlutterTexture: _isUseFlutterTexture,
+                              useAndroidSurfaceView: _isUseAndroidSurfaceView,
+                            ),
                           ),
-                          useFlutterTexture: _isUseFlutterTexture,
-                          useAndroidSurfaceView: _isUseAndroidSurfaceView,
-                        ),
-                      ),
               ),
 
               // Current User
@@ -399,78 +438,79 @@ class _State extends State<VideoMeetView> {
                           padding: const EdgeInsets.all(12),
                           backgroundColor: isJoined ? Colors.red : Colors.green,
                         ),
-                        onPressed: isJoined
-                            ? () {
-                                showDialog<void>(
-                                  context: context,
-                                  builder: (context) => Center(
-                                    child: Card(
-                                      margin: const EdgeInsets.all(36),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+
+                          if (isJoined) {
+                            showDialog<void>(
+                              context: context,
+                              builder: (context) => Center(
+                                child: Card(
+                                  margin: const EdgeInsets.all(36),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        const Text(
+                                          'Leave Session?',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        const Text(
+                                          'By clicking yes you will be '
+                                          'disconnected from this session.',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
                                           children: [
-                                            const Text(
-                                              'Leave Session?',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w600,
+                                            TextButton(
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors.grey,
                                               ),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('No'),
                                             ),
-                                            const SizedBox(height: 8),
-                                            const Text(
-                                              'By clicking yes you will be '
-                                              'disconnected from this session.',
-                                              style: TextStyle(
-                                                color: Colors.grey,
+                                            const SizedBox(width: 16),
+                                            TextButton(
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors.red,
                                               ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                TextButton(
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor:
-                                                        Colors.grey,
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text('No'),
-                                                ),
-                                                const SizedBox(width: 16),
-                                                TextButton(
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor: Colors.red,
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.of(context)
-                                                        .popUntil(
-                                                      (route) => route.isFirst,
-                                                    );
-                                                  },
-                                                  child: const Text('Yes'),
-                                                ),
-                                              ],
+                                              onPressed: () {
+                                                Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst,
+                                                );
+                                              },
+                                              child: const Text('Yes'),
                                             ),
                                           ],
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ),
-                                );
-                              }
-                            : () {
-                                _joinChannel(context);
-                              },
+                                ),
+                              ),
+                            );
+                          } else {
+                            _joinChannel(context);
+                            Fluttertoast.showToast(msg: 'Session Joined!');
+                          }
+                        },
                         child: Text(isJoined ? 'Leave' : 'Join'),
                       ),
                     ),

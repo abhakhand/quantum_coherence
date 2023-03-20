@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quantum_coherence/src/auth/bloc/auth_bloc.dart';
-import 'package:quantum_coherence/src/welcome/views/welcome_view.dart';
+import 'package:quantum_coherence/src/home/views/home_view.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -36,9 +36,7 @@ class LoginView extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: const StadiumBorder(),
                   ),
                   onPressed: () {
                     context.read<AuthBloc>().add(LoggedInWithGoogle());
@@ -60,7 +58,7 @@ class LoginView extends StatelessWidget {
               if (state.loginStatus.isSuccess) {
                 Navigator.of(context).pushReplacement<void, void>(
                   MaterialPageRoute(
-                    builder: (context) => const WelcomeView(),
+                    builder: (context) => const HomeView(),
                   ),
                 );
               }
@@ -69,7 +67,7 @@ class LoginView extends StatelessWidget {
               if (state.loginStatus.isLoading) {
                 return const SizedBox.expand(
                   child: ColoredBox(
-                    color: Colors.black45,
+                    color: Colors.black54,
                     child: Center(
                       child: CircularProgressIndicator.adaptive(),
                     ),

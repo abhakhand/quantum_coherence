@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:quantum_coherence/src/welcome/models/mentor.dart';
+import 'package:quantum_coherence/src/home/models/mentor.dart';
 
 class Session extends Equatable {
   const Session({

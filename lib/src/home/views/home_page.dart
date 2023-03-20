@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:quantum_coherence/src/auth/bloc/auth_bloc.dart';
-import 'package:quantum_coherence/src/core/domain/helpers/helpers.dart';
+import 'package:quantum_coherence/src/home/models/mentor.dart';
+import 'package:quantum_coherence/src/home/models/session.dart';
 import 'package:quantum_coherence/src/video_meet/views/video_meet_view.dart';
-import 'package:quantum_coherence/src/welcome/models/mentor.dart';
-import 'package:quantum_coherence/src/welcome/models/session.dart';
 
-class WelcomeView extends StatefulWidget {
-  const WelcomeView({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<WelcomeView> createState() => _WelcomeViewState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _WelcomeViewState extends State<WelcomeView> {
+class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
@@ -85,17 +82,6 @@ class _WelcomeViewState extends State<WelcomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state.user.name.isEmpty) {
-              return Text('Good ${sessionName()} 👋');
-            } else {
-              return Text('Hello, ${state.user.name.split(' ').first} 👋');
-            }
-          },
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

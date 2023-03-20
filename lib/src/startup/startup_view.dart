@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quantum_coherence/src/auth/bloc/auth_bloc.dart';
 import 'package:quantum_coherence/src/auth/views/login_view.dart';
-import 'package:quantum_coherence/src/welcome/views/welcome_view.dart';
+import 'package:quantum_coherence/src/home/views/home_view.dart';
 
 class StartupView extends StatefulWidget {
   const StartupView({super.key});
@@ -33,7 +33,7 @@ class _StartupViewState extends State<StartupView> {
             context.read<AuthBloc>().add(UserRequested());
             Navigator.of(context).pushReplacement<void, void>(
               MaterialPageRoute(
-                builder: (context) => const WelcomeView(),
+                builder: (context) => const HomeView(),
               ),
             );
           }
